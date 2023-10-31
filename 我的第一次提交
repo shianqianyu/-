@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>烟花效果</title>
+<style>
+  body { margin: 0; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas></canvas>
+<script>
+  const canvas = document.querySelector('canvas');
+  const ctx = canvas.getContext('2d');
+  let particlesArray = [];
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+
+  class Particle {
+    constructor(x, y, size, color, velocity) {
+      this.x = x;
+      this.y = y;
+      this.size = size;
+      this.color = color;
+      this.velocity = velocity;
+      this.alpha = 1;
+    }
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = this.alpha;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+      ctx.restore();
+    }
+    update() {
+      this.x += this.velocity.x;
+      this.y += this.velocity.y;
+      this.size *= 0.95;
+      this.alpha -= 0.01;
+    }
+  }
+
+  function createParticles(event) {
+    const xPos = event.x;
+    const yPos = event.y;
+    for (let i = 0; i < 50; i++) {
+      const size = Math.random() * 5 + 1;
+      const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 3 + 1;
+      const velocity = {
+        x: Math.cos(angle) * speed,
+        y: Math.sin(angle) * speed
+      };
+      particlesArray.push(new Particle(xPos, yPos, size, color, velocity));
+    }
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particlesArray.forEach((particle, index) => {
+      if (particle.size > 0.2 && particle.alpha > 0.01) {
+        particle.update();
+        particle.draw();
+      } else {
+        particlesArray.splice(index, 1);
+      }
+    });
+    requestAnimationFrame(animateParticles);
+  }
+
+  canvas.addEventListener('click', createParticles);
+  animateParticles();
+</script>
+</body>
+</html>
